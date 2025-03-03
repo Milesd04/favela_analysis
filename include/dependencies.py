@@ -6,6 +6,7 @@ import geopandas as gpd
 import networkx as nx
 import numpy as np
 import momepy as mm
+import momepy
 import pyproj
 import osmnx as ox
 import libpysal
@@ -27,4 +28,19 @@ from shapely import LineString
 from shapely.geometry import Point
 
 # Custom Packages
-from favela_analysis.src import *
+from src import *
+
+
+
+#INSTALLATION:
+# !pip install momepy
+# !pip install osmnx
+# !pip install PyDrive
+# !pip install clustergram
+# !pip install folium matplotlib mapclassify
+# !pip install shapely
+# !pip install matplotlib-scalebar
+# !pip install basemap
+# !pip install bokeh
+# !pip install seaborn
+# !pip install libpysal

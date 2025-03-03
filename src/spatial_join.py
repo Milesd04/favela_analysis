@@ -42,12 +42,12 @@ def create_joined_gdf(clean_buildings, centroids_gdf, tessellation):
     Create a joined GeoDataFrame using the join method.
 
     Parameters:
-    clean_buildings (GeoDataFrame)
-    centroids_gdf (GeoDataFrame)
-    tessellation (GeoDataFrame)
+        clean_buildings (GeoDataFrame)
+        centroids_gdf (GeoDataFrame)
+        tessellation (GeoDataFrame)
 
     Returns:
-    GeoDataFrame: A joined GeoDataFrame containing all building, centroid, and tessellation data
+        GeoDataFrame: A joined GeoDataFrame containing all building, centroid, and tessellation data
     """
     # Join buildings with centroids
     joined_gdf = clean_buildings.join(

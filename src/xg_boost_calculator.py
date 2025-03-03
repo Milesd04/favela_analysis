@@ -49,7 +49,7 @@ def run_xgboost(ground_truth_gdf, metrics=None, test_size=0.2, random_state=432,
     label_encoder = LabelEncoder()
     label_encoder.fit(['not-favela', 'favela'])
     y_encoded = label_encoder.transform(y)
-    y_encoded = 1 - y_encoded  # so that not-favela = 0, favela = 1
+    y_encoded = 1 - y_encoded  # so that not-favela = 0, favela = 1 (hacky i should figure out how this works)
 
     print("Target value counts:")
     print(pd.Series(y_encoded).value_counts())
@@ -87,6 +87,8 @@ def run_xgboost(ground_truth_gdf, metrics=None, test_size=0.2, random_state=432,
         'X_train': X_train,
         'X': X,
         'X_test': X_test,
+        'y_test': y_test,
+        'y_train': y_train,
         'accuracy': accuracy,
         'classification_report': class_report_dict,
         'feature_importances': feature_importances,
