@@ -1,0 +1,1 @@
+{"metrics": ["area", "perimeter", "lal", "neighbour_dist", "mean_interbuilding_distance", "adjacency", "corners", "shape_idx", "facade_ratio", "compact_weighted_axis", "circular_com", "squareness", "square_compact", "rectangularity", "rect_idx", "perimeter_wall", "num_neighbors", "elongation", "fractal", "cwa", "CAR", "tes_area", "shared_walls"]}
