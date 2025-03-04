@@ -2,6 +2,7 @@ import os
 import json
 import os, pickle, json
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
@@ -87,8 +88,10 @@ def run_xgboost(ground_truth_gdf, metrics=None, test_size=0.2, random_state=432,
         'X_train': X_train,
         'X': X,
         'X_test': X_test,
+        'y_pred': y_pred,
         'y_test': y_test,
         'y_train': y_train,
+        'label_encoder': label_encoder,
         'accuracy': accuracy,
         'classification_report': class_report_dict,
         'feature_importances': feature_importances,
@@ -104,9 +107,12 @@ def save_xgboost_results(results, output_dir, site_name):
 
     The following files are created in output_dir:
         xgb_model.json: the trained model
-        X_imputed.csv: imputed feature values
-        X_train.csv: training features
-        X.csv: original features
+        X_imputed.pkl: imputed feature values
+        X_train.pkl: training features
+        X.pkl: original features
+        y_pred.pkl:
+        y_test.pkl:
+        y_train.pkl:
         accuracy.json: a JSON file with the accuracy value
         classification_report.txt: the classification report as text
         feature_importances.csv: feature importance values
@@ -121,6 +127,10 @@ def save_xgboost_results(results, output_dir, site_name):
     model_filepath = os.path.join(output_dir, site_name + '_xgb_model.json')
     results['model'].save_model(model_filepath)
 
+    # Save label encoder
+    label_encoder_filepath = os.path.join(output_dir, site_name + '_label_encoder_classes.npy')
+    np.save(label_encoder_filepath, results['label_encoder'].classes_)
+
     #CAN LOAD WITH:
     # from xgboost import XGBClassifier
     # model = XGBClassifier()
@@ -131,6 +141,14 @@ def save_xgboost_results(results, output_dir, site_name):
     results['X_train'].to_pickle(os.path.join(output_dir, site_name + '_X_train.pkl'))
     results['X'].to_pickle(os.path.join(output_dir, site_name + '_X.pkl'))
     results['X_test'].to_pickle(os.path.join(output_dir, site_name + '_X_test.pkl'))
+
+    y_test_path = os.path.join(output_dir, site_name + '_y_test.npy')
+    y_pred_path = os.path.join(output_dir, site_name + '_y_pred.npy')
+    y_train_path = os.path.join(output_dir, site_name + '_y_train.npy')
+
+    np.save(y_test_path, results['y_test'])
+    np.save(y_pred_path, results['y_pred'])
+    np.save(y_train_path, results['y_train'])
 
     # Save accuracy and classification report.
     with open(os.path.join(output_dir, site_name + '_accuracy.json'), 'w') as f:

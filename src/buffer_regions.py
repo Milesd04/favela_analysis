@@ -11,15 +11,15 @@ def process_building_shapefile(input_shp, output_shp, center, initial_side_lengt
     Parameters:
         input_shp (str): Path to input building shapefile.
         output_shp (str): Path where output shapefile will be saved.
-        center (Point): Fixed center point for the study region.
-        initial_side_length (float): Starting side length for the square region in meters.
+        center (Point): Fixed center point for study region.
+        initial_side_length (float): Starting side length for square region in meters.
         k (float): Tuning parameter for dynamic scaling.
-        max_iters (int): Max number of iterations for adjusting the square.
+        max_iters (int): Max number of iterations for adjusting square.
         target_ratio (tuple): Desired ratio range (min, max) for favela buildings.
         count_column (str): Column name used to determine building type.
 
     Returns:
-        GeoDataFrame: The subset of buildings that meet the criteria.
+        GeoDataFrame: The subset of buildings that meet criteria.
     """
     gdf = load_buildings_within_radius(input_shp, center_point, radius=1500) # how big should this be?
     gdf = label_buildings(gdf, count_column=count_column) # favela or not-favela
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     # center_point = Point(644547.4, 7466496.6)  # Example center (in EPSG:31983)
     # initial_length = 750  # Starting side length in meters
 
-    input_shapefile = r"C:\Users\miles\OneDrive\Desktop\school\UROP\Data\Favelas_joined.shp"
+    input_shapefile = r"C:\Users\miles\favela_project\all_rio.shp"
     # output_shapefile = r"C:\Users\miles\favela_analysis\site_shps\jacarezinho.shp"
     # center_point = Point(678527.25, 7467819.51)  # Example center (in EPSG:31983) - Jacarezinho
 
@@ -173,9 +173,9 @@ if __name__ == "__main__":
         input_shp=input_shapefile,
         output_shp=output_shapefile,
         center=center_point,
-        initial_side_length=200,
+        initial_side_length=300,
         k=0.5,
         max_iters=30,
-        target_ratio=(0.25, 0.35),
+        target_ratio=(0.25, 0.30), #25%-35% is good, but aim for 30
         count_column='nome_count',
     )
