@@ -1,0 +1,152 @@
+{
+    "faz_quem_quer": {
+        "accuracy": 93.85593220338984,
+        "classification_report": {
+            "favela": {
+                "precision": 0.9463276836158192,
+                "recall": 0.9710144927536232,
+                "f1-score": 0.9585121602288984,
+                "support": 690.0
+            },
+            "not-favela": {
+                "precision": 0.9152542372881356,
+                "recall": 0.8503937007874016,
+                "f1-score": 0.8816326530612245,
+                "support": 254.0
+            },
+            "accuracy": 0.9385593220338984,
+            "macro avg": {
+                "precision": 0.9307909604519774,
+                "recall": 0.9107040967705125,
+                "f1-score": 0.9200724066450614,
+                "support": 944.0
+            },
+            "weighted avg": {
+                "precision": 0.937966819879345,
+                "recall": 0.9385593220338984,
+                "f1-score": 0.9378263606308166,
+                "support": 944.0
+            }
+        }
+    },
+    "jacarezinho": {
+        "accuracy": 61.106628242074926,
+        "classification_report": {
+            "favela": {
+                "precision": 0.6358893472458141,
+                "recall": 0.9335589597434985,
+                "f1-score": 0.7564953810623557,
+                "support": 5614.0
+            },
+            "not-favela": {
+                "precision": 0.13856812933025403,
+                "recall": 0.019601437438745508,
+                "f1-score": 0.03434459072696051,
+                "support": 3061.0
+            },
+            "accuracy": 0.6110662824207492,
+            "macro avg": {
+                "precision": 0.38722873828803406,
+                "recall": 0.476580198591122,
+                "f1-score": 0.3954199858946581,
+                "support": 8675.0
+            },
+            "weighted avg": {
+                "precision": 0.46040805064183377,
+                "recall": 0.6110662824207492,
+                "f1-score": 0.5016822895100047,
+                "support": 8675.0
+            }
+        }
+    },
+    "morro_da_guaiba": {
+        "accuracy": 62.35997012696042,
+        "classification_report": {
+            "favela": {
+                "precision": 0.6763990267639902,
+                "recall": 0.8881789137380192,
+                "f1-score": 0.7679558011049724,
+                "support": 939.0
+            },
+            "not-favela": {
+                "precision": 0.009433962264150943,
+                "recall": 0.0025,
+                "f1-score": 0.003952569169960474,
+                "support": 400.0
+            },
+            "accuracy": 0.6235997012696042,
+            "macro avg": {
+                "precision": 0.3429164945140706,
+                "recall": 0.44533945686900955,
+                "f1-score": 0.38595418513746643,
+                "support": 1339.0
+            },
+            "weighted avg": {
+                "precision": 0.47715628904932583,
+                "recall": 0.6235997012696042,
+                "f1-score": 0.5397248132229674,
+                "support": 1339.0
+            }
+        }
+    },
+    "nova_cidade": {
+        "accuracy": 58.74504898895143,
+        "classification_report": {
+            "favela": {
+                "precision": 0.7076700434153401,
+                "recall": 0.7161687170474517,
+                "f1-score": 0.7118940165963022,
+                "support": 3414.0
+            },
+            "not-favela": {
+                "precision": 0.2779433681073025,
+                "recall": 0.26970354302241506,
+                "f1-score": 0.27376146788990824,
+                "support": 1383.0
+            },
+            "accuracy": 0.5874504898895143,
+            "macro avg": {
+                "precision": 0.49280670576132135,
+                "recall": 0.49293613003493336,
+                "f1-score": 0.4928277422431052,
+                "support": 4797.0
+            },
+            "weighted avg": {
+                "precision": 0.5837776123227789,
+                "recall": 0.5874504898895143,
+                "f1-score": 0.5855781285702563,
+                "support": 4797.0
+            }
+        }
+    },
+    "rocinha": {
+        "accuracy": 43.439667128987516,
+        "classification_report": {
+            "favela": {
+                "precision": 0.4345342706502636,
+                "recall": 0.9318467336683417,
+                "f1-score": 0.5926887734718338,
+                "support": 3184.0
+            },
+            "not-favela": {
+                "precision": 0.4319371727748691,
+                "recall": 0.040983606557377046,
+                "f1-score": 0.07486388384754991,
+                "support": 4026.0
+            },
+            "accuracy": 0.4343966712898752,
+            "macro avg": {
+                "precision": 0.43323572171256636,
+                "recall": 0.4864151701128594,
+                "f1-score": 0.33377632865969187,
+                "support": 7210.0
+            },
+            "weighted avg": {
+                "precision": 0.4330840742499393,
+                "recall": 0.4343966712898752,
+                "f1-score": 0.3035399516095083,
+                "support": 7210.0
+            }
+        }
+    }
+}

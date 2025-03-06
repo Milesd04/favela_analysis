@@ -16,7 +16,6 @@ def classify_and_analyze_favelas(clean_buildings, type_column='tipo', plot=True)
             GeoDataFrame: Buildings with added classification
             dict: Analysis results
     """
-    # Copy to avoid modifying original
     buildings_copy = clean_buildings.copy()
 
     buildings_copy['label'] = np.where(
