@@ -21,7 +21,7 @@ def process_building_shapefile(input_shp, output_shp, center, initial_side_lengt
     Returns:
         GeoDataFrame: The subset of buildings that meet criteria.
     """
-    gdf = load_buildings_within_radius(input_shp, center_point, radius=1500) # how big should this be?
+    gdf = load_buildings_within_radius(input_shp, center_point, radius=3000) # how big should this be?
     gdf = label_buildings(gdf, count_column=count_column) # favela or not-favela
 
     best_square = adjust_square(gdf, center, initial_side_length, k, max_iters, target_ratio)
@@ -166,16 +166,16 @@ if __name__ == "__main__":
     # center_point = Point(678527.25, 7467819.51)  # Example center (in EPSG:31983) - Jacarezinho
 
 
-    output_shapefile = r"C:\Users\miles\favela_analysis\site_shps\morro_da_guaiba.shp"
-    center_point = Point(674751.62, 7473736.83)
+    output_shapefile = r"C:\Users\miles\favela_analysis\site_shps\faz_quem_quer"
+    center_point = Point(670414.838, 7471629.047)
 
     filtered_buildings = process_building_shapefile(
         input_shp=input_shapefile,
         output_shp=output_shapefile,
         center=center_point,
-        initial_side_length=300,
+        initial_side_length=1000,
         k=0.5,
-        max_iters=30,
+        max_iters=50,
         target_ratio=(0.25, 0.30), #25%-35% is good, but aim for 30
         count_column='nome_count',
     )

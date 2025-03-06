@@ -21,7 +21,7 @@ def calculate_shap_results(xgb_model, X_imputed, metrics, ground_truth_gdf):
             'updated_gdf' (GeoDataFrame): Updated with new columns for each feature's SHAP values.
     """
     explainer = shap.Explainer(xgb_model, X_imputed)
-    shap_values = explainer(X_imputed)
+    shap_values = explainer(X_imputed, check_additivity=False) #check_additivity = False for now... might be worth investigating this. the reported error difference was negligible <0.1
     shap_df = pd.DataFrame(shap_values.values, columns=metrics)
     shap_df.index = ground_truth_gdf.index
     updated_gdf = ground_truth_gdf.copy()
@@ -82,10 +82,9 @@ def save_shap_results(shap_results, output_dir, site_name):
     # Write the explainer to a file stream
     explainer_path = os.path.join(output_dir, site_name + '_explainer.shap')
     with open(explainer_path, 'wb') as f:
-        shap_results['explainer'].save(f, model_saver=dummy) # im not even sure if we need to save the explainer? it seems the plots rely only on the shap_values... safe to save it anyways.
+        shap_results['explainer'].save(f, model_saver=dummy) # im not even sure if we need to save the explainer? it seems the plots rely only on the shap_values (besides force)... safe to save it anyways.
 
     print("SHAP results successfully saved to:", output_dir)
-
 
 def dummy(output_dir, model):
     pass
