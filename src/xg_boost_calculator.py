@@ -38,7 +38,7 @@ def run_xgboost(ground_truth_gdf, metrics=None, test_size=0.2, random_state=432,
         metrics = [
             'area', 'perimeter', 'lal', 'neighbour_dist',
             'mean_interbuilding_distance', 'adjacency', 'corners', 'shape_idx',
-            'facade_ratio', 'compact_weighted_axis', 'circular_com',
+            'facade_ratio', 'compact_weighted_axis',
             'squareness', 'square_compact', 'rectangularity', 'rect_idx',
             'perimeter_wall', 'num_neighbors', 'elongation', 'fractal',
             'cwa', 'CAR', 'tes_area', 'shared_walls'
@@ -164,6 +164,8 @@ def save_xgboost_results(results, output_dir, site_name):
     # Save the metrics list.
     with open(os.path.join(output_dir, site_name + '_metrics.json'), 'w') as f:
         json.dump({'metrics': results['metrics']}, f)
+
+# TODO: ADD CODE TO AUTOMATICALLY GENERATE CONFUSION MATRIX BASED ON XGBOOST RESULTS
 
 if __name__ == "__main__":
     # Example usage (for testing):

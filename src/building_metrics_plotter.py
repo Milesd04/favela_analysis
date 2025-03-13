@@ -76,7 +76,6 @@ class BuildingMetricsPlotter:
             'rectangularity': ('Rectangularity', 'magma'),
             'squareness': ('Squareness', 'magma'),
             'square_compact': ('Square Compactness', 'cool'),
-            'circular_com': ('Circular Compactness', 'viridis'),
             'elongation': ('Elongation', 'Blues_r'),
             'fractal': ('Fractal Dimension', 'Wistia')
         }

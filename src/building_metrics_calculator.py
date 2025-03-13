@@ -57,7 +57,6 @@ class BuildingMetricsCalculator:
         self.clean_buildings['rectangularity'] = momepy.rectangularity(self.clean_buildings)
         self.clean_buildings['squareness'] = momepy.squareness(self.clean_buildings)
         self.clean_buildings['square_compact'] = momepy.square_compactness(self.clean_buildings)
-        self.clean_buildings['circular_com'] = momepy.circular_compactness(self.clean_buildings)
         self.clean_buildings['elongation'] = momepy.elongation(self.clean_buildings)
         self.clean_buildings['fractal'] = momepy.fractal_dimension(self.clean_buildings)
 
