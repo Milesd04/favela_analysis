@@ -9,6 +9,9 @@ from scipy.spatial.distance import euclidean
 from shapely.geometry import LineString
 import matplotlib.pyplot as plt
 
+
+# check what we are even doing with the topology metircs skull
+
 class BuildingMetricsCalculator:
     def __init__(self, clean_buildings, tessellation, output_dir):
         """

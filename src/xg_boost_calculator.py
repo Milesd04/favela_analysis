@@ -41,7 +41,7 @@ def run_xgboost(ground_truth_gdf, metrics=None, test_size=0.2, random_state=432,
             'facade_ratio', 'compact_weighted_axis',
             'squareness', 'square_compact', 'rectangularity', 'rect_idx',
             'perimeter_wall', 'num_neighbors', 'elongation', 'fractal',
-            'cwa', 'CAR', 'tes_area', 'shared_walls'
+            'cwa', 'CAR', 'tes_area', 'shared_walls', "convexity", "cell_alignment",
         ]
 
     X = ground_truth_gdf[metrics]

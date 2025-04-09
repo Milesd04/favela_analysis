@@ -3,6 +3,8 @@ import pandas as pd
 import shap
 import numpy as np
 
+### TO DO: NEED TO MAKE IT SO THAT THE GDF SAVES THE ENTIRE NAME OF THE GIVEN FIELD
+
 def calculate_shap_results(xgb_model, X_imputed, metrics, ground_truth_gdf):
     """
     Compute SHAP values for a trained XGBoost model and return a dictionary of results.
