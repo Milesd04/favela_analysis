@@ -102,6 +102,7 @@ class BuildingMetricsCalculator:
         G = self._create_delaunay_graph(coordinates, tri)
         self.weighted_edges = self._calculate_weighted_edges(G, coordinates)
         self.avg_distances = self._calculate_average_distances(G)
+        self.clean_buildings['avg_weighted_dist'] = self.clean_buildings.index.map(self.avg_distances)
 
     def _create_delaunay_graph(self, coordinates, tri):
         """Create networkx graph from Delaunay triangulation"""

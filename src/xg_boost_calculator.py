@@ -41,7 +41,8 @@ def run_xgboost(ground_truth_gdf, metrics=None, test_size=0.2, random_state=432,
             'facade_ratio', 'compact_weighted_axis',
             'squareness', 'square_compact', 'rectangularity', 'rect_idx',
             'perimeter_wall', 'num_neighbors', 'elongation', 'fractal',
-            'cwa', 'CAR', 'tes_area', 'shared_walls', "convexity", "cell_alignment",
+            'cwa', 'CAR', 'tes_area', 'shared_walls', 'convexity', 'cell_alignment',
+            'avg_weighted_dist'
         ]
 
     X = ground_truth_gdf[metrics]
@@ -158,7 +159,6 @@ def save_xgboost_results(results, output_dir, site_name):
     report_df = pd.DataFrame(results['classification_report']).transpose()
     report_df.to_csv(os.path.join(output_dir, site_name + '_classification_report.csv'), index=True)
 
-    # Save feature importances.
     results['feature_importances'].to_csv(os.path.join(output_dir, site_name + '_feature_importances.csv'))
 
     # Save the metrics list.

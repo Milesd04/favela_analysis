@@ -44,7 +44,7 @@ def save_shap_results(shap_results, output_dir, site_name):
     """
     Save the SHAP results to the specified output directory.
 
-    The following files will be created in output_dir:
+    The following files will be created in output_dir (inside a subfolder named site_name):
         shap_values.pkl: the SHAP values as a pkl file (from shap_df)
         shap_values.pkl: the raw SHAP values
         updated_buildings_with_shap.shp: the GeoDataFrame with SHAP columns (saved as a shapefile)
@@ -55,18 +55,20 @@ def save_shap_results(shap_results, output_dir, site_name):
         output_dir (str)
         site_name (str)
     """
-    os.makedirs(output_dir, exist_ok=True)
+    # Create a subfolder named after site_name
+    site_subfolder = os.path.join(output_dir, site_name)
+    os.makedirs(site_subfolder, exist_ok=True)
 
     # Save the SHAP DataFrame as pkl.
-    shap_pkl_path = os.path.join(output_dir, site_name + '_shap_values_only.pkl')
+    shap_pkl_path = os.path.join(site_subfolder, site_name + '_shap_values_only.pkl')
     shap_results['shap_df'].to_pickle(shap_pkl_path)
 
-    # Save the raw SHAP values as npy, as it is a numpy.ndarray.
-    shap_values_npy_path = os.path.join(output_dir, site_name + '_shap_values_full.npy')
+    # Save the raw SHAP values as npy, as it is a numpy.ndarray
+    shap_values_npy_path = os.path.join(site_subfolder, site_name + '_shap_values_full.npy')
     shap_values = shap_results['shap_values'].values
-    np.save(shap_values_npy_path,shap_values)
+    np.save(shap_values_npy_path, shap_values)
 
-    # Prepare the updated GeoDataFrame for saving.
+    # Prepare the updated GeoDataFrame for saving
     updated_gdf = shap_results['updated_gdf'].copy()
     updated_gdf = updated_gdf.set_geometry("geometry")
 
@@ -76,17 +78,16 @@ def save_shap_results(shap_results, output_dir, site_name):
             updated_gdf = updated_gdf.drop(columns=[extra_geom])
 
     # Save the cleaned GeoDataFrame as a shapefile.
-    shapefile_path = os.path.join(output_dir, site_name + '_updated_buildings_with_shap.shp')
+    shapefile_path = os.path.join(site_subfolder, site_name + '_updated_buildings_with_shap.shp')
     updated_gdf.to_file(shapefile_path)
 
     # Save the explainer using SHAP's built-in save function
     # SHAP website suggests using: save(out_file[, model_saver, masker_saver])
-    # Write the explainer to a file stream
-    explainer_path = os.path.join(output_dir, site_name + '_explainer.shap')
+    explainer_path = os.path.join(site_subfolder, site_name + '_explainer.shap')
     with open(explainer_path, 'wb') as f:
-        shap_results['explainer'].save(f, model_saver=dummy) # im not even sure if we need to save the explainer? it seems the plots rely only on the shap_values (besides force)... safe to save it anyways.
+        shap_results['explainer'].save(f, model_saver=dummy)
 
-    print("SHAP results successfully saved to:", output_dir)
+    print("SHAP results successfully saved to:", site_subfolder)
 
 def dummy(output_dir, model):
     pass
