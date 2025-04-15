@@ -12,28 +12,9 @@ from sklearn.preprocessing import LabelEncoder
 
 def run_xgboost(ground_truth_gdf, metrics=None, test_size=0.2, random_state=432, n_estimators=100):
     """
-    Run an XGBoost classification on a GeoDataFrame using specified features and return the model, evaluation metrics,
-    feature importances, and the updated GeoDataFrame with predictions.
-
-    Parameters:
-        ground_truth_gdf (GeoDataFrame): Input GeoDataFrame containing building data with a 'label' column.
-        metrics (list of str, optional): List of feature columns to use for training. If None, a default list is used.
-        test_size (float): Proportion of the data to set aside for testing.
-        random_state (int): Random seed for reproducibility.
-        n_estimators (int): Number of trees (estimators) for the XGBoost model.
-
-    Returns:
-        dict: A dictionary containing:
-            'model': The trained XGBoost model.
-            'X_imputed': The imputed features DataFrame.
-            'X_train': Training set features.
-            'X': The original feature DataFrame.
-            'accuracy' (float)
-            'classification_report' (str): Results of classification
-            'feature_importances' (DataFrame)
-            'updated_gdf' (GeoDataFrame): Updated with new column 'predicted_label'.
-            'metrics' (lst): List of metrics used for training.
+    Run an XGBoost classification with proper data handling and return comprehensive results.
     """
+    # Set up metrics and data
     if metrics is None:
         metrics = [
             'area', 'perimeter', 'lal', 'neighbour_dist',
@@ -48,122 +29,125 @@ def run_xgboost(ground_truth_gdf, metrics=None, test_size=0.2, random_state=432,
     X = ground_truth_gdf[metrics]
     y = ground_truth_gdf['label']
 
+    # Encode labels with explicit order
     label_encoder = LabelEncoder()
-    label_encoder.fit(['not-favela', 'favela'])
+    label_encoder.fit(["not-favela", "favela"]) # 0=not-favela, 1=favela
     y_encoded = label_encoder.transform(y)
-    y_encoded = 1 - y_encoded  # so that not-favela = 0, favela = 1 (hacky i should figure out how this works)
 
-    print("Target value counts:")
-    print(pd.Series(y_encoded).value_counts())
+    # Split first to prevent data leakage
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y_encoded, test_size=test_size, random_state=random_state
+    )
 
-    imputer = SimpleImputer(strategy='median')
-    X_imputed = pd.DataFrame(imputer.fit_transform(X), columns=X.columns)
+    # Impute missing values using training data statistics
+    imputer = SimpleImputer(strategy='median') # look into
+    X_train_imputed = pd.DataFrame(imputer.fit_transform(X_train), columns=X.columns)
+    X_test_imputed = pd.DataFrame(imputer.transform(X_test), columns=X.columns)
+    X_full_imputed = pd.DataFrame(imputer.transform(X), columns=X.columns) # For final predictions
 
-    X_train, X_test, y_train, y_test = train_test_split(X_imputed, y_encoded, test_size=test_size, random_state=random_state)
+    # Train model
+    xgb_model = XGBClassifier(n_estimators=n_estimators,
+                            random_state=random_state,
+                            eval_metric='logloss')
+    xgb_model.fit(X_train_imputed, y_train)
 
-    xgb_model = XGBClassifier(n_estimators=n_estimators, random_state=random_state, eval_metric='logloss')
-    xgb_model.fit(X_train, y_train)
-
-    y_pred = xgb_model.predict(X_test)
-
-    ground_truth_gdf['predicted_label'] = label_encoder.inverse_transform(xgb_model.predict(X_imputed))
-
+    # Evaluate
+    y_pred = xgb_model.predict(X_test_imputed)
     accuracy = accuracy_score(y_test, y_pred) * 100
-    class_report_dict = classification_report(y_test, y_pred, target_names=label_encoder.classes_, output_dict=True)
+    class_report = classification_report(y_test, y_pred,
+                                       target_names=label_encoder.classes_,
+                                       output_dict=True)
 
-    print("Accuracy:", accuracy)
-    print("Classification Report:")
-    print(class_report_dict)
+    # Generate predictions for full dataset
+    ground_truth_gdf['predicted_label'] = label_encoder.inverse_transform(
+        xgb_model.predict(X_full_imputed)
+    )
 
+    # Feature importance
     feature_importances = pd.DataFrame({
         'Feature': metrics,
         'Importance': xgb_model.feature_importances_
-    }).sort_values(by='Importance', ascending=False)
+    }).sort_values('Importance', ascending=False)
 
-    print("Feature Importances:")
-    print(feature_importances)
-
-    results = {
+    return {
         'model': xgb_model,
-        'X_imputed': X_imputed,
-        'X_train': X_train,
-        'X': X,
-        'X_test': X_test,
-        'y_pred': y_pred,
-        'y_test': y_test,
-        'y_train': y_train,
+        'imputer': imputer,
         'label_encoder': label_encoder,
+        'X_train_imputed': X_train_imputed,
+        'X_test_imputed': X_test_imputed,
+        'X_full_imputed': X_full_imputed,
+        'y_train': y_train,
+        'y_test': y_test,
+        'y_pred': y_pred,
         'accuracy': accuracy,
-        'classification_report': class_report_dict,
+        'classification_report': class_report,
         'feature_importances': feature_importances,
         'updated_gdf': ground_truth_gdf,
         'metrics': metrics
     }
 
-    return results
-
 def save_xgboost_results(results, output_dir, site_name):
     """
-    Save the XGBoost results to the specified output directory.
+    Save XGBoost results with complete reproducibility package.
 
-    The following files are created in output_dir:
-        xgb_model.json: the trained model
-        X_imputed.pkl: imputed feature values
-        X_train.pkl: training features
-        X.pkl: original features
-        y_pred.pkl:
-        y_test.pkl:
-        y_train.pkl:
-        accuracy.json: a JSON file with the accuracy value
-        classification_report.txt: the classification report as text
-        feature_importances.csv: feature importance values
-        updated_buildings.shp: the updated GeoDataFrame with predictions saved as a shapefile
-        metrics.json: the list of metrics used (in JSON format)
+    Output:
+        [site_name]_xgb_model.json: Trained model (XGBoost native format)
+        [site_name]_imputer.pkl: Fitted SimpleImputer for preprocessing new data
+        [site_name]_label_encoder.pkl: Fitted LabelEncoder for label handling
+        [site_name]_X_train_imputed.pkl: Imputed training features
+        [site_name]_X_test_imputed.pkl: Imputed test features
+        [site_name]_X_full_imputed.pkl: Imputed features for entire dataset
+        [site_name]_y_*.npy: y arrays (train/test/pred)
+        [site_name]_accuracy.json: Test accuracy
+        [site_name]_classification_report.csv: Detailed classification metrics
+        [site_name]_feature_importances.csv: Feature importance rankings
+        [site_name]_updated_buildings.shp: Predictions with geometry (GeoPackage)
+        [site_name]_metrics.json: List of metrics used for training
     """
-
-
     os.makedirs(output_dir, exist_ok=True)
+    base_path = lambda suffix: os.path.join(output_dir, f"{site_name}_{suffix}")
 
-    # Save the trained model.
-    model_filepath = os.path.join(output_dir, site_name + '_xgb_model.json')
-    results['model'].save_model(model_filepath)
+    # Save core model components
+    results['model'].save_model(base_path("xgb_model.json"))
 
-    # Save label encoder
-    label_encoder_filepath = os.path.join(output_dir, site_name + '_label_encoder_classes.npy')
-    np.save(label_encoder_filepath, results['label_encoder'].classes_)
+    with open(base_path("imputer.pkl"), 'wb') as f:
+        pickle.dump(results['imputer'], f)
 
-    #CAN LOAD WITH:
-    # from xgboost import XGBClassifier
-    # model = XGBClassifier()
-    # model.load_model(model_filepath)
+    with open(base_path("label_encoder.pkl"), 'wb') as f:
+        pickle.dump(results['label_encoder'], f)
 
-    # Save DataFrames.
-    results['X_imputed'].to_pickle(os.path.join(output_dir, site_name + '_X_imputed.pkl'))
-    results['X_train'].to_pickle(os.path.join(output_dir, site_name + '_X_train.pkl'))
-    results['X'].to_pickle(os.path.join(output_dir, site_name + '_X.pkl'))
-    results['X_test'].to_pickle(os.path.join(output_dir, site_name + '_X_test.pkl'))
+    # Save processed datasets
+    results['X_full_imputed'].to_pickle(base_path("X_full_imputed.pkl"))
+    results['X_train_imputed'].to_pickle(base_path("X_train_imputed.pkl"))
+    results['X_test_imputed'].to_pickle(base_path("X_test_imputed.pkl"))
 
-    y_test_path = os.path.join(output_dir, site_name + '_y_test.npy')
-    y_pred_path = os.path.join(output_dir, site_name + '_y_pred.npy')
-    y_train_path = os.path.join(output_dir, site_name + '_y_train.npy')
+    # Save target arrays
+    for arr_type in ['y_train', 'y_test', 'y_pred']:
+        np.save(base_path(f"{arr_type}.npy"), results[arr_type])
 
-    np.save(y_test_path, results['y_test'])
-    np.save(y_pred_path, results['y_pred'])
-    np.save(y_train_path, results['y_train'])
-
-    # Save accuracy and classification report.
-    with open(os.path.join(output_dir, site_name + '_accuracy.json'), 'w') as f:
+    # Save evaluation metrics
+    with open(base_path("accuracy.json"), 'w') as f:
         json.dump({'accuracy': results['accuracy']}, f)
 
-    # Save the classification report as a CSV file
-    report_df = pd.DataFrame(results['classification_report']).transpose()
-    report_df.to_csv(os.path.join(output_dir, site_name + '_classification_report.csv'), index=True)
+    pd.DataFrame(results['classification_report']).transpose().to_csv(
+        base_path("classification_report.csv"), index=True
+    )
 
-    results['feature_importances'].to_csv(os.path.join(output_dir, site_name + '_feature_importances.csv'))
+    results['feature_importances'].to_csv(
+        base_path("feature_importances.csv"), index=False
+    )
 
-    # Save the metrics list.
-    with open(os.path.join(output_dir, site_name + '_metrics.json'), 'w') as f:
+    # Save metadata
+    with open(base_path("metrics.json"), 'w') as f:
         json.dump({'metrics': results['metrics']}, f)
+
+    # # Save spatial predictions
+    # results['updated_gdf'].to_file(
+    #     base_path("updated_buildings.gpkg"),
+    #     driver='GPKG',
+    #     layer='buildings',
+    #     encoding='utf-8'
+    # )
 
 # TODO: ADD CODE TO AUTOMATICALLY GENERATE CONFUSION MATRIX BASED ON XGBOOST RESULTS
 
@@ -173,4 +157,22 @@ if __name__ == "__main__":
     # gdf = gpd.read_file("path/to/shapefile.shp")
     # results = run_xgboost(gdf)
     # save_xgboost_results(results, r"C:\Users\miles\favela_analysis\output\test_folder")
+
+
+    # example to load
+    # def load_xgboost_results(output_dir, site_name):
+    # """Reload saved model package"""
+    # base = lambda s: os.path.join(output_dir, f"{site_name}_{s}")
+
+    # return {
+    #     'model': XGBClassifier().load_model(base("xgb_model.json")),
+    #     'imputer': pickle.load(open(base("imputer.pkl"), 'rb')),
+    #     'label_encoder': pickle.load(open(base("label_encoder.pkl"), 'rb')),
+    #     'data': {
+    #         'X_full': pd.read_pickle(base("X_full_imputed.pkl")),
+    #         'X_train': pd.read_pickle(base("X_train_imputed.pkl")),
+    #         'y_train': np.load(base("y_train.npy")),
+    #     },
+    #     'metrics': json.load(open(base("metrics.json")))['metrics']
+    # }
     pass

@@ -3,8 +3,6 @@ import pandas as pd
 import shap
 import numpy as np
 
-### TO DO: NEED TO MAKE IT SO THAT THE GDF SAVES THE ENTIRE NAME OF THE GIVEN FIELD
-
 def calculate_shap_results(xgb_model, X_imputed, metrics, ground_truth_gdf):
     """
     Compute SHAP values for a trained XGBoost model and return a dictionary of results.
@@ -22,72 +20,83 @@ def calculate_shap_results(xgb_model, X_imputed, metrics, ground_truth_gdf):
             'shap_df' (DataFrame): SHAP values with columns named after the metrics.
             'updated_gdf' (GeoDataFrame): Updated with new columns for each feature's SHAP values.
     """
-    explainer = shap.Explainer(xgb_model, X_imputed)
-    shap_values = explainer(X_imputed, check_additivity=False) #check_additivity = False for now... might be worth investigating this. the reported error difference was negligible <0.1
-    shap_df = pd.DataFrame(shap_values.values, columns=metrics)
+    # Initialize explainer with correct parameters
+    explainer = shap.TreeExplainer(
+        xgb_model,
+        model_output="raw" # XGBoost's raw margin (log-odds) output
+    )
+
+    # Get SHAP values for class 1 (favela)
+    shap_values = explainer.shap_values(X_imputed)
+    # reverse for visualization
+    shap_values = -shap_values
+
+    # Handle binary classification output format
+
+    if isinstance(shap_values, list) and len(shap_values) == 2:
+        shap_values = shap_values[1] # [0]=not-favela, [1]=favela chnag ing this value doesn't do anything lol
+
+    # Create DataFrame and update GeoDataFrame
+    shap_df = pd.DataFrame(shap_values, columns=metrics)
     shap_df.index = ground_truth_gdf.index
+
     updated_gdf = ground_truth_gdf.copy()
     for feature in metrics:
         updated_gdf[f'shap_{feature}'] = shap_df[feature]
 
-    result = {
+    return {
         'explainer': explainer,
-        'shap_values': shap_values, # i may have broke this by changing it from .values() but we'll see
+        'shap_values': shap_values,
         'shap_df': shap_df,
         'updated_gdf': updated_gdf
     }
-
-    return result
-
 
 def save_shap_results(shap_results, output_dir, site_name):
     """
     Save the SHAP results to the specified output directory.
 
-    The following files will be created in output_dir (inside a subfolder named site_name):
-        shap_values.pkl: the SHAP values as a pkl file (from shap_df)
-        shap_values.pkl: the raw SHAP values
-        updated_buildings_with_shap.shp: the GeoDataFrame with SHAP columns (saved as a shapefile)
-        explainer.shap: the SHAP explainer saved to a file stream using shap.save()
-
     Parameters:
-        shap_results (dict)
-        output_dir (str)
-        site_name (str)
-    """
-    # Create a subfolder named after site_name
-    site_subfolder = os.path.join(output_dir, site_name)
-    os.makedirs(site_subfolder, exist_ok=True)
+        shap_results (dict):
+            Dictionary containing 'shap_df', 'shap_values', 'updated_gdf', and 'explainer'.
+        output_dir (str):
+            The path to the directory where all output files should be saved.
+        site_name (str):
+            A short identifier used in the generated filenames.
 
-    # Save the SHAP DataFrame as pkl.
-    shap_pkl_path = os.path.join(site_subfolder, site_name + '_shap_values_only.pkl')
+    Output:
+        [site_name]_shap_values_only.pkl:
+            The SHAP values (from shap_df) serialized as a pandas DataFrame.
+        [site_name]_shap_values_full.npy:
+            The raw SHAP values as a NumPy array.
+        [site_name]_updated_buildings_with_shap.gpkg:
+            The updated GeoDataFrame (with SHAP columns) saved as a GeoPackage.
+        [site_name]_explainer.shap:
+            (Commented out by default) The SHAP explainer saved via shap.save().
+    """
+
+    shap_pkl_path = os.path.join(output_dir, f"{site_name}_shap_values_only.pkl")
     shap_results['shap_df'].to_pickle(shap_pkl_path)
 
-    # Save the raw SHAP values as npy, as it is a numpy.ndarray
-    shap_values_npy_path = os.path.join(site_subfolder, site_name + '_shap_values_full.npy')
-    shap_values = shap_results['shap_values'].values
+    shap_values_npy_path = os.path.join(output_dir, f"{site_name}_shap_values_full.npy")
+    shap_values = shap_results['shap_values']
     np.save(shap_values_npy_path, shap_values)
 
-    # Prepare the updated GeoDataFrame for saving
     updated_gdf = shap_results['updated_gdf'].copy()
     updated_gdf = updated_gdf.set_geometry("geometry")
 
-    # Drop extra geometry columns if they exist
+    # drop extra geometry columns if they exist
     for extra_geom in ['centroid', 'geometry_tessellation']:
         if extra_geom in updated_gdf.columns:
             updated_gdf = updated_gdf.drop(columns=[extra_geom])
 
-    # Save the cleaned GeoDataFrame as a shapefile.
-    shapefile_path = os.path.join(site_subfolder, site_name + '_updated_buildings_with_shap.shp')
-    updated_gdf.to_file(shapefile_path)
+    geopackage_path = os.path.join(output_dir, f"{site_name}_updated_buildings_with_shap.gpkg")
+    updated_gdf.to_file(geopackage_path, driver='GPKG')
 
     # Save the explainer using SHAP's built-in save function
     # SHAP website suggests using: save(out_file[, model_saver, masker_saver])
-    explainer_path = os.path.join(site_subfolder, site_name + '_explainer.shap')
-    with open(explainer_path, 'wb') as f:
-        shap_results['explainer'].save(f, model_saver=dummy)
-
-    print("SHAP results successfully saved to:", site_subfolder)
+    # explainer_path = os.path.join(site_subfolder, site_name + '_explainer.shap')
+    # with open(explainer_path, 'wb') as f:
+    #     shap_results['explainer'].save(f, model_saver=dummy)
 
 def dummy(output_dir, model):
     pass

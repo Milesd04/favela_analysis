@@ -1,0 +1,62 @@
+{
+    "morro_da_guaiba": {
+        "accuracy": 66.91560866318149,
+        "classification_report": {
+            "favela": {
+                "precision": 0.09433962264150944,
+                "recall": 0.0125,
+                "f1-score": 0.02207505518763797,
+                "support": 400.0
+            },
+            "not-favela": {
+                "precision": 0.692846034214619,
+                "recall": 0.9488817891373802,
+                "f1-score": 0.8008988764044944,
+                "support": 939.0
+            },
+            "accuracy": 0.6691560866318148,
+            "macro avg": {
+                "precision": 0.3935928284280642,
+                "recall": 0.4806908945686901,
+                "f1-score": 0.4114869657960662,
+                "support": 1339.0
+            },
+            "weighted avg": {
+                "precision": 0.5140539769859082,
+                "recall": 0.6691560866318148,
+                "f1-score": 0.5682405280200713,
+                "support": 1339.0
+            }
+        }
+    },
+    "nova_cidade": {
+        "accuracy": 87.55472170106316,
+        "classification_report": {
+            "favela": {
+                "precision": 0.8226600985221675,
+                "recall": 0.7245119305856833,
+                "f1-score": 0.7704728950403691,
+                "support": 1383.0
+            },
+            "not-favela": {
+                "precision": 0.8935456831517183,
+                "recall": 0.9367311072056239,
+                "f1-score": 0.9146289146289146,
+                "support": 3414.0
+            },
+            "accuracy": 0.8755472170106317,
+            "macro avg": {
+                "precision": 0.8581028908369429,
+                "recall": 0.8306215188956536,
+                "f1-score": 0.8425509048346418,
+                "support": 4797.0
+            },
+            "weighted avg": {
+                "precision": 0.8731090011540805,
+                "recall": 0.8755472170106317,
+                "f1-score": 0.8730679859045122,
+                "support": 4797.0
+            }
+        }
+    }
+}

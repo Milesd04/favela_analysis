@@ -9,9 +9,6 @@ from scipy.spatial.distance import euclidean
 from shapely.geometry import LineString
 import matplotlib.pyplot as plt
 
-
-# check what we are even doing with the topology metircs skull
-
 class BuildingMetricsCalculator:
     def __init__(self, clean_buildings, tessellation, output_dir):
         """
@@ -97,7 +94,7 @@ class BuildingMetricsCalculator:
             self.centroids_gdf.geometry.y
         ))
 
-         # Calculate Delaunay triangulation and weighted distances
+        # Calculate Delaunay triangulation and weighted distances
         tri = Delaunay(coordinates)
         G = self._create_delaunay_graph(coordinates, tri)
         self.weighted_edges = self._calculate_weighted_edges(G, coordinates)
@@ -125,7 +122,6 @@ class BuildingMetricsCalculator:
         return gpd.GeoDataFrame(edges)
 
     def _calculate_average_distances(self, G):
-        """Calculate average weighted distances for each node"""
         avg_distances = {}
         for node in G.nodes():
             neighbors = list(G.neighbors(node))
@@ -137,7 +133,6 @@ class BuildingMetricsCalculator:
         return avg_distances
 
     def run_all_calculations(self):
-        """Run all metric calculations"""
         self.calculate_basic_metrics()
         self.calculate_spatial_metrics()
         self.calculate_shape_metrics()

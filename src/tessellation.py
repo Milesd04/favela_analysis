@@ -13,7 +13,7 @@ def perform_perfect_tessellation(buildings_path, min_area=1.0, buffer_dist=100, 
         buildings_path (str): Path to the buildings shapefile
         min_area (float): Minimum area threshold for buildings
         buffer_dist (float): Distance for buffered limit
-        max_iterations (int): Maximum number of iterations (kept for API compatibility)
+        max_iterations (int): Maximum number of iterations (kept for API compatibility) TODO get rid of this :skull:
 
     Returns:
         tuple: (clean_buildings, tessellation, excluded_buildings, report)
@@ -78,7 +78,6 @@ def perform_perfect_tessellation(buildings_path, min_area=1.0, buffer_dist=100, 
             warnings.filterwarnings('ignore', category=UserWarning)
             limit = mm.buffered_limit(clean_buildings, buffer_dist)
 
-        # Assign unique IDs
         clean_buildings['uID'] = mm.unique_id(clean_buildings)
 
         # Create initial tessellation
